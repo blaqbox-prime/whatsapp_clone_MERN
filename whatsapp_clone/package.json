@@ -10,6 +10,7 @@
     "pusher-js": "^5.1.0-beta",
     "react": "^17.0.0",
     "react-dom": "^17.0.0",
+    "react-router-dom": "^6.3.0",
     "react-scripts": "0.9.5"
   },
   "scripts": {
