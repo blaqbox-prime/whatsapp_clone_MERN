@@ -1,5 +1,4 @@
 # Whatsapp Clone - Group Chats
------------------------------------------
 
  This is a complete *M.E.R.N* stack chat app. 
  Based on the Whatsapp build by [CleverProgrammer](https://github.com/CleverProgrammers) on [Youtube](https://www.youtube.com/watch?v=gzdQDxzW2Tw&t=11312s).
