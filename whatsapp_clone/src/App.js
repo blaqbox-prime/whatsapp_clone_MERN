@@ -5,10 +5,17 @@ import Sidebar from "./components/Sidebar/Sidebar";
 import Pusher from "pusher-js";
 import axios from "./axios";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import Login from "./components/Login/Login";
+import { useAuth0 } from "@auth0/auth0-react";
 
 function App() {
   const [rooms, setRooms] = useState([]);
   const [selectedRoom, setSelectedRoom] = useState(null);
+  // const [user, setUser] = useState(null);
+  const {user,
+    isAuthenticated,
+    loginWithRedirect,
+    logout,} = useAuth0();
 
   // Get Rooms ------------------
   useEffect(() => {
@@ -43,8 +50,13 @@ function App() {
     };
   }, [rooms]);
 
+  console.log(user);
+
   //BEM Convention
-  return (
+  return !user ? (
+    <Login />
+  )
+  : (
     <div className="app">
       <div className="app__body">
         <Router>
@@ -57,6 +69,7 @@ function App() {
             />
           </Routes>
         </Router>
+        
       </div>
     </div>
   );

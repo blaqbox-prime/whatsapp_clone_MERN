@@ -6,6 +6,7 @@ import axios from '../../axios';
 import moment from 'moment';
 import {useParams} from 'react-router-dom';
 import Pusher from 'pusher-js';
+import {useAuth0} from '@auth0/auth0-react'
 
 
 function Chat({room}) {
@@ -13,7 +14,7 @@ function Chat({room}) {
     const [input, setInput] = useState('');
     const [messages, setMessages] = useState([]);
     const {roomId} = useParams();
-
+    const {user, isAuthenticated} = useAuth0();
 
     useEffect(() => {
         setSeed(Math.floor(Math.random()*5000));
@@ -54,16 +55,18 @@ function Chat({room}) {
       e.preventDefault();
       console.log(input);
 
-      // send Message
+     if(isAuthenticated){
+        // send Message
       axios.post(`/rooms/${room._id}/messages/new`,
       {
         "message": input,
-        "name": "Prime",
+        "name": user.name,
         "timestamp": moment().format('LT'), 
-        "recieved": false
+        "sender" : user.email
     });
 
       setInput('');
+     }
 
       
     }
@@ -92,7 +95,7 @@ function Chat({room}) {
         <div className="chat__body">
 
         {room && messages.map(message => (
-          <p className={`chat__message ${!message.recieved && 'chat__reciever'}`}>
+          <p key={message._id} className={`chat__message ${message.sender == user.email && 'chat__reciever'}`}>
             <span className="chat__name">{message.name}</span>
             {message.message}
             <span className="chat__timestamp">{message.timestamp}</span>
