@@ -4,29 +4,69 @@ import React,{useEffect, useState} from 'react'
 import './Chat.css'
 import axios from '../../axios';
 import moment from 'moment';
+import {useParams} from 'react-router-dom';
+import Pusher from 'pusher-js';
+import {useAuth0} from '@auth0/auth0-react'
 
-function Chat({messages}) {
+
+function Chat({room}) {
     const [seed, setSeed] = useState('5484');
     const [input, setInput] = useState('');
+    const [messages, setMessages] = useState([]);
+    const {roomId} = useParams();
+    const {user, isAuthenticated} = useAuth0();
 
     useEffect(() => {
         setSeed(Math.floor(Math.random()*5000));
     },[])
 
+    // Initial Fetch
+  useEffect(() => {
+    axios.get(`rooms/${roomId}/messages/sync`)
+    .then(res => {
+      console.log(res.data);
+      setMessages(res.data);
+    });
+  }, [roomId])
+  
+
+  // // Initial Subscribe to backend
+  useEffect(() => {
+    
+    const pusher = new Pusher('2ef8e42ac2a86cf936b0', {
+      cluster: 'mt1'
+    });
+
+    var channel = pusher.subscribe('messages');
+    channel.bind('update', function(data) {
+      // alert(JSON.stringify(data));
+      setMessages([...messages,data]);
+    });
+  
+    return () => {
+      channel.unbind_all();
+     channel.unsubscribe();
+    }
+  }, [messages])
+
+  // console.log(messages);
+
     const sendMessage = (e) => {
       e.preventDefault();
       console.log(input);
 
-      // send Message
-      axios.post('/messages/new',
+     if(isAuthenticated){
+        // send Message
+      axios.post(`/rooms/${room._id}/messages/new`,
       {
         "message": input,
-        "name": "Prime",
+        "name": user.name,
         "timestamp": moment().format('LT'), 
-        "recieved": false
+        "sender" : user.email
     });
 
       setInput('');
+     }
 
       
     }
@@ -36,8 +76,8 @@ function Chat({messages}) {
         <div className="chat__header">
         <Avatar src={`https://avatars.dicebear.com/api/human/${seed}.svg`} />
         <div className="chat__headerInfo">
-            <h3>Room Name</h3>
-            <p>last seen at ....</p>
+            <h3>{room && room.name}</h3>
+            <p>{messages.length > 0 ? `last seen at ${messages[messages.length - 1].timestamp}`: ''}</p>
         </div>
         <div className="chat__headerRight">
         <IconButton>
@@ -54,8 +94,8 @@ function Chat({messages}) {
         {/*  */}
         <div className="chat__body">
 
-        {messages.map(message => (
-          <p className={`chat__message ${!message.recieved && 'chat__reciever'}`}>
+        {room && messages.map(message => (
+          <p key={message._id} className={`chat__message ${message.sender == user.email && 'chat__reciever'}`}>
             <span className="chat__name">{message.name}</span>
             {message.message}
             <span className="chat__timestamp">{message.timestamp}</span>

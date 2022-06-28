@@ -1,20 +1,11 @@
 import { Avatar, IconButton } from "@material-ui/core";
 import { Chat, DonutLarge, MoreVert, SearchOutlined } from "@material-ui/icons";
-import React, {useState, useEffect} from "react";
+import React from "react";
 import SidebarChat from "../SidebarChat/SidebarChat";
 import "./Sidebar.css";
 
-function Sidebar() {
-
-  const [rooms, setRooms] = useState([]);
-
-  useEffect(() => {
+function Sidebar({rooms, onRoomClick}) {
   
-    return () => {
-    }
-  }, [])
-  
-
   return (
     <div className="sidebar">
       <div className="sidebar__header">
@@ -41,7 +32,11 @@ function Sidebar() {
       {/* =================================================== */}
       <div className="sidebar__chats">
           <SidebarChat addNewChat/>
-        {rooms.map((room) => (<SidebarChat key={room.id} id={room.name} name={room.name}/>))}
+        {
+        rooms.map((room) => 
+        (<SidebarChat key={room._id} id={room._id} name={room.name}
+        onClick={() => onRoomClick(room)}
+        />))}
       </div>
     </div>
   );
